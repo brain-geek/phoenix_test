@@ -206,6 +206,20 @@ defmodule PhoenixTest.IndexLive do
       </button>
     </form>
 
+    <form
+      id="phx-trigger-action-form"
+      phx-trigger-action={@trigger_action}
+      phx-submit="save-phx-trigger-action-form"
+      action="/page/create_record"
+      method="post"
+    >
+      <label for="name">Name</label>
+      <input name="name" />
+      <button type="submit" id="phx-trigger-action-form-submit">
+        Save
+      </button>
+    </form>
+
     <form id="invalid-form">
       <label for="invalid-form-email">Email (no input)</label>
 
@@ -420,6 +434,7 @@ defmodule PhoenixTest.IndexLive do
       |> allow_upload(:avatar, accept: ~w(.jpg .jpeg))
       |> allow_upload(:main_avatar, accept: ~w(.jpg .jpeg))
       |> allow_upload(:backup_avatar, accept: ~w(.jpg .jpeg))
+      |> assign(:trigger_action, false)
     }
   end
 
@@ -451,6 +466,10 @@ defmodule PhoenixTest.IndexLive do
       |> assign(:form_saved, true)
       |> assign(:form_data, form_data)
     }
+  end
+
+  def handle_event("save-phx-trigger-action-form", _, socket) do
+    {:noreply, assign(socket, :trigger_action, true)}
   end
 
   def handle_event("save-redirect-form", _, socket) do
