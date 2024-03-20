@@ -62,6 +62,7 @@ defmodule PhoenixTest.Live do
         |> element(selector, text)
         |> render_click()
         |> maybe_redirect(session)
+        |> maybe_trigger_action(selector, form_data)
 
       Button.belongs_to_form?(button) ->
         active_form = session.active_form
@@ -305,10 +306,44 @@ defmodule PhoenixTest.Live do
     end
   end
 
+
   defp no_active_form_error do
     %ArgumentError{
       message: "There's no active form. Fill in a form with `fill_in`, `select`, etc."
     }
+  end
+
+  defp maybe_trigger_action(%PhoenixTest.Live{} = session, selector, form_data) do
+    element =
+      session
+      |> render_html()
+      |> Query.find(selector)
+
+    case element do
+      {:found, form_element} ->
+        case phx_trigger_action_form?(form_element) do
+          true ->
+            session.conn
+            |> PhoenixTest.Static.build()
+            |> PhoenixTest.submit_form(selector, form_data)
+
+          _ ->
+            session
+        end
+
+      _ ->
+        session
+    end
+  end
+
+  defp maybe_trigger_action(session, _, _) do
+    session
+  end
+
+  defp action_form?(form_element) do
+    action = Html.attribute(form_element, "action")
+
+    action != nil && action != ""
   end
 
   def submit_form(session, selector, form_data, event_data) do
@@ -335,6 +370,12 @@ defmodule PhoenixTest.Live do
         raise ArgumentError,
               "Expected form with selector #{inspect(selector)} to have a `phx-submit` or `action` defined."
     end
+  end
+
+  defp phx_trigger_action_form?(form_element) do
+    phx_trigger_action = Html.attribute(form_element, "phx-trigger-action")
+
+    phx_trigger_action != nil && phx_trigger_action != ""
   end
 
   def open_browser(%{view: view} = session, open_fun \\ &Phoenix.LiveViewTest.open_browser/1) do
