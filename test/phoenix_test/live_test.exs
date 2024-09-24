@@ -791,9 +791,9 @@ defmodule PhoenixTest.LiveTest do
     test "submits on phx-trigger-action", %{conn: conn} do
       conn
       |> visit("/live/index")
-      |> fill_form("#phx-trigger-action-form", name: "Aragorn")
-      |> click_button("#phx-trigger-action-form-submit", "Save")
-      |> assert_has("h1", "Record created")
+      |> fill_in("Trigger action form", with: "Aragorn")
+      |> click_button("Trigger action form button")
+      |> assert_has("h1", text: "Record created")
     end
 
     test "submits regular (non phx-submit) form", %{conn: conn} do

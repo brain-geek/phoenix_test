@@ -213,10 +213,10 @@ defmodule PhoenixTest.IndexLive do
       action="/page/create_record"
       method="post"
     >
-      <label for="name">Name</label>
+      <label for="name">Trigger action form</label>
       <input name="name" />
       <button type="submit" id="phx-trigger-action-form-submit">
-        Save
+        Trigger action form button
       </button>
     </form>
 

@@ -62,7 +62,7 @@ defmodule PhoenixTest.Live do
         |> element(selector, text)
         |> render_click()
         |> maybe_redirect(session)
-        |> maybe_trigger_action(selector, form_data)
+        |> maybe_trigger_action(selector)
 
       Button.belongs_to_form?(button) ->
         active_form = session.active_form
@@ -313,7 +313,7 @@ defmodule PhoenixTest.Live do
     }
   end
 
-  defp maybe_trigger_action(%PhoenixTest.Live{} = session, selector, form_data) do
+  defp maybe_trigger_action(%PhoenixTest.Live{} = session, selector) do
     element =
       session
       |> render_html()
@@ -323,10 +323,8 @@ defmodule PhoenixTest.Live do
       {:found, form_element} ->
         case phx_trigger_action_form?(form_element) do
           true ->
-            session.conn
-            |> PhoenixTest.Static.build()
-            |> PhoenixTest.submit_form(selector, form_data)
-
+            form = Phoenix.LiveViewTest.form(session.conn, selector)
+            Phoenix.LiveViewTest.follow_trigger_action(form, session.conn)
           _ ->
             session
         end
@@ -336,14 +334,8 @@ defmodule PhoenixTest.Live do
     end
   end
 
-  defp maybe_trigger_action(session, _, _) do
+  defp maybe_trigger_action(session, _) do
     session
-  end
-
-  defp action_form?(form_element) do
-    action = Html.attribute(form_element, "action")
-
-    action != nil && action != ""
   end
 
   def submit_form(session, selector, form_data, event_data) do
